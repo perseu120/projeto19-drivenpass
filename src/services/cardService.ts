@@ -1,222 +1,222 @@
-import { TransactionTypes, Card, CardInsertData, insert, update } from './../repositories/cardRepository';
-import { findByTypeAndEmployeeId } from "../repositories/cardRepository";
-import { findByApiKey } from "../repositories/companyRepository";
-import { findById } from "../repositories/employeeRepository";
-import  findByIdCard  from './../repositories/cardRepository';
-import { faker } from '@faker-js/faker';
-import dayjs from 'dayjs';
-import Cryptr from "cryptr";
-import bcrypt from "bcrypt";
-import { insertRecharge } from '../repositories/rechargeRepository';
+// import { TransactionTypes, Card, CardInsertData, insert, update } from './../repositories/cardRepository';
+// import { findByTypeAndEmployeeId } from "../repositories/cardRepository";
+// import { findByApiKey } from "../repositories/companyRepository";
+// import { findById } from "../repositories/employeeRepository";
+// import  findByIdCard  from './../repositories/cardRepository';
+// import { faker } from '@faker-js/faker';
+// import dayjs from 'dayjs';
+// import Cryptr from "cryptr";
+// import bcrypt from "bcrypt";
+// import { insertRecharge } from '../repositories/rechargeRepository';
 
-const cryptr = new Cryptr('myTotallySecretKey');
-
-
-export async function verifyApiKey(apiKey: string ){
+// const cryptr = new Cryptr('myTotallySecretKey');
 
 
-    const companyApiKey = await findByApiKey(apiKey);
+// export async function verifyApiKey(apiKey: string ){
 
-    if(!companyApiKey){
-        throw { code:"NotFound" }
-    }
 
-}
+//     const companyApiKey = await findByApiKey(apiKey);
 
-export async function verifyEmployee(employeeId: number){
+//     if(!companyApiKey){
+//         throw { code:"NotFound" }
+//     }
 
-    const employee = await findById(employeeId);
+// }
 
-    if(!employee){
-        throw { code:"NotFound" }
-    }
+// export async function verifyEmployee(employeeId: number){
 
-    return employee;
-}
+//     const employee = await findById(employeeId);
 
-export async function verifyEmployeeAndType(type: TransactionTypes, employeeId: number){
+//     if(!employee){
+//         throw { code:"NotFound" }
+//     }
 
-    const typeCard = await findByTypeAndEmployeeId(type, employeeId);
-    console.log(typeCard)
-    if(typeCard){
-        throw { code:"Conflict" }
-    }
+//     return employee;
+// }
 
-}
+// export async function verifyEmployeeAndType(type: TransactionTypes, employeeId: number){
 
-function factoryName(name:string[]){
-    let fullName : string = "";
+//     const typeCard = await findByTypeAndEmployeeId(type, employeeId);
+//     console.log(typeCard)
+//     if(typeCard){
+//         throw { code:"Conflict" }
+//     }
 
-    for(let i =0; i< name.length; i++){
+// }
+
+// function factoryName(name:string[]){
+//     let fullName : string = "";
+
+//     for(let i =0; i< name.length; i++){
         
-        if(i === 0 || i === name.length-1){
-            fullName+= name[i];
-        }
-        else if(name[i].length >=3){
-            fullName+=` ${name[i][0]} `
-        }
-    }
+//         if(i === 0 || i === name.length-1){
+//             fullName+= name[i];
+//         }
+//         else if(name[i].length >=3){
+//             fullName+=` ${name[i][0]} `
+//         }
+//     }
 
-    return fullName;
-}
+//     return fullName;
+// }
 
-export async function creatCardCard(apiKey: string, type: TransactionTypes, employeeId: number) {
+// export async function creatCardCard(apiKey: string, type: TransactionTypes, employeeId: number) {
 
-    await verifyEmployeeAndType(type, employeeId);
+//     await verifyEmployeeAndType(type, employeeId);
 
-    await verifyApiKey(apiKey);
+//     await verifyApiKey(apiKey);
 
-    const employee = await verifyEmployee(employeeId);
+//     const employee = await verifyEmployee(employeeId);
 
-    const cardNumber = faker.finance.creditCardNumber('################');
+//     const cardNumber = faker.finance.creditCardNumber('################');
     
-    const cardCVV :string = faker.finance.creditCardCVV();
-    const encryptedCVV = cryptr.encrypt(cardCVV);
+//     const cardCVV :string = faker.finance.creditCardCVV();
+//     const encryptedCVV = cryptr.encrypt(cardCVV);
 
-    const dataExpirion = dayjs().add(5, 'year').format("MM/YY");
+//     const dataExpirion = dayjs().add(5, 'year').format("MM/YY");
 
-    const fullName = employee.fullName;
+//     const fullName = employee.fullName;
     
-    const cardholderName = factoryName(fullName.split(" "))
+//     const cardholderName = factoryName(fullName.split(" "))
 
-    const Card:CardInsertData = {
+//     const Card:CardInsertData = {
 
-        employeeId: employeeId,
-        number: cardNumber,
-        cardholderName: cardholderName,
-        securityCode: encryptedCVV,
-        expirationDate: dataExpirion,
-        isVirtual: false,
-        isBlocked: true,
-        type: type
+//         employeeId: employeeId,
+//         number: cardNumber,
+//         cardholderName: cardholderName,
+//         securityCode: encryptedCVV,
+//         expirationDate: dataExpirion,
+//         isVirtual: false,
+//         isBlocked: true,
+//         type: type
 
-    }
+//     }
 
-    await insert(Card);
+//     await insert(Card);
 
-}
+// }
 
-export async function verifyCardExistent(id){
-    const card = findByIdCard(id)
+// export async function verifyCardExistent(id){
+//     const card = findByIdCard(id)
     
-    if(!card){
-        throw {code: "NotFound"}
-    }
+//     if(!card){
+//         throw {code: "NotFound"}
+//     }
 
-    return card;
-}
+//     return card;
+// }
 
-export async function verifyValidateDateCard(expirationDate){
-    const dateDifference = dayjs(expirationDate).diff(dayjs().format('MM/YY'),'month', true);
+// export async function verifyValidateDateCard(expirationDate){
+//     const dateDifference = dayjs(expirationDate).diff(dayjs().format('MM/YY'),'month', true);
 
-    if (dateDifference < 0) {
-        throw  { code: 'Expired'}
-    }
+//     if (dateDifference < 0) {
+//         throw  { code: 'Expired'}
+//     }
     
-    return false;
-}
+//     return false;
+// }
 
-function verifyIfUnlocked(isBlocked: boolean) {
-    if (!isBlocked) {
-      throw { 
-        code: 'Conflict'
-      }
-    }
-}
-function verifyIfBlocked(isBlocked: boolean) {
-    if (isBlocked) {
-      throw { 
-        code: 'Conflict'
-      }
-    }
-}
+// function verifyIfUnlocked(isBlocked: boolean) {
+//     if (!isBlocked) {
+//       throw { 
+//         code: 'Conflict'
+//       }
+//     }
+// }
+// function verifyIfBlocked(isBlocked: boolean) {
+//     if (isBlocked) {
+//       throw { 
+//         code: 'Conflict'
+//       }
+//     }
+// }
 
-function authenticatePassword(password: string, encryptedPassword: string) {
-    const comparePassword = bcrypt.compareSync(password, encryptedPassword);
-    if(!comparePassword){
-      throw { code: 'Unauthorized' }
-    }
-}
+// function authenticatePassword(password: string, encryptedPassword: string) {
+//     const comparePassword = bcrypt.compareSync(password, encryptedPassword);
+//     if(!comparePassword){
+//       throw { code: 'Unauthorized' }
+//     }
+// }
 
-export async function  unlockCardService(id: number, password: string){
+// export async function  unlockCardService(id: number, password: string){
     
-    const card = await verifyCardExistent(id);
+//     const card = await verifyCardExistent(id);
     
-    await verifyValidateDateCard(card.expirationDate);
+//     await verifyValidateDateCard(card.expirationDate);
    
-    verifyIfUnlocked(card.isBlocked);
+//     verifyIfUnlocked(card.isBlocked);
     
-    authenticatePassword(password, card.password);
+//     authenticatePassword(password, card.password);
     
-    await update(id, {isBlocked: false});
-}
+//     await update(id, {isBlocked: false});
+// }
 
-export async function  blockCardService(id: number, password: string){
+// export async function  blockCardService(id: number, password: string){
     
-    const card = await verifyCardExistent(id);
+//     const card = await verifyCardExistent(id);
     
-    await verifyValidateDateCard(card.expirationDate);
+//     await verifyValidateDateCard(card.expirationDate);
    
-    verifyIfBlocked(card.isBlocked);
+//     verifyIfBlocked(card.isBlocked);
     
-    authenticatePassword(password, card.password);
+//     authenticatePassword(password, card.password);
     
-    await update(id, {isBlocked: true});
-}
+//     await update(id, {isBlocked: true});
+// }
 
-function encryptPassword(password: string) {
-    const encryptedPassword = bcrypt.hashSync(password, 10);
-    return encryptedPassword;
-}
+// function encryptPassword(password: string) {
+//     const encryptedPassword = bcrypt.hashSync(password, 10);
+//     return encryptedPassword;
+// }
 
-function verifyCVC(cvc: string, encryptedCVC: string) {
+// function verifyCVC(cvc: string, encryptedCVC: string) {
     
-    const decryptedCVC: string = cryptr.decrypt(encryptedCVC);
+//     const decryptedCVC: string = cryptr.decrypt(encryptedCVC);
 
-    if (!(cvc === decryptedCVC)) {
-      throw  { code: 'BadRequest' }
-    }
-    return false;
-}
+//     if (!(cvc === decryptedCVC)) {
+//       throw  { code: 'BadRequest' }
+//     }
+//     return false;
+// }
 
-export async function activateCardService(id: number, cvc: string, password: string ){
+// export async function activateCardService(id: number, cvc: string, password: string ){
   
-    const card = await verifyCardExistent(id);
+//     const card = await verifyCardExistent(id);
   
-    await verifyValidateDateCard(card.expirationDate);
+//     await verifyValidateDateCard(card.expirationDate);
   
-    if (card.password) {
-      throw { 
-        code: 'Conflict'
-      }
-    }
+//     if (card.password) {
+//       throw { 
+//         code: 'Conflict'
+//       }
+//     }
   
-    verifyCVC(cvc, card.securityCode);
+//     verifyCVC(cvc, card.securityCode);
   
-    const encryptedPassword = encryptPassword(password);
+//     const encryptedPassword = encryptPassword(password);
   
-    await update(id, {password: encryptedPassword});
+//     await update(id, {password: encryptedPassword});
 
-}
+// }
 
-function verifyCardActive(password){
+// function verifyCardActive(password){
 
-    if (!password) {
-        throw { 
-          code: 'BadRequest'
-        }
-    }
-}
+//     if (!password) {
+//         throw { 
+//           code: 'BadRequest'
+//         }
+//     }
+// }
 
-export async function rechargeService(id: number, amount: number, apiKey: string){
+// export async function rechargeService(id: number, amount: number, apiKey: string){
 
-    await verifyApiKey(apiKey);
+//     await verifyApiKey(apiKey);
     
-    const card = await verifyCardExistent(id);
+//     const card = await verifyCardExistent(id);
     
-    verifyCardActive(card.password);
+//     verifyCardActive(card.password);
     
-    await verifyValidateDateCard(card.expirationDate);
+//     await verifyValidateDateCard(card.expirationDate);
 
-    await insertRecharge({cardId: card.id, amount})
-}
+//     await insertRecharge({cardId: card.id, amount})
+// }

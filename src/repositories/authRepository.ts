@@ -1,4 +1,4 @@
-// import { connection } from "../database";
+import client from "../database";
 // import { mapObjectToUpdateQuery } from "../utils/sqlUtils";
 
 // export type TransactionTypes =
@@ -9,28 +9,59 @@
 //   | "health";
 
 
-// export interface Card {
-//   id: number;
-//   employeeId: number;
-//   number: string;
-//   cardholderName: string;
-//   securityCode: string;
-//   expirationDate: string;
-//   password?: string;
-//   isVirtual: boolean;
-//   originalCardId?: number;
-//   isBlocked: boolean;
-//   type: TransactionTypes;
-// }
+export interface User {
+  id: number;
+  email: string;
+  senha: string;
+}
 
-// export type CardInsertData = Omit<Card, "id">;
+export type UserInsertData = Omit<User, "id">;
+
+
 // export type CardUpdateData = Partial<Card>;
 
-// export async function find() {
-//   const result = await connection.query<Card>("SELECT * FROM cards");
-//   return result.rows;
-// }
+export async function insertUser(user: UserInsertData){
 
+  await client.users.create({
+    data: {
+        email: user.email,
+        senha: user.senha
+    }
+  });
+}
+
+export async function findEmail(email:string) {
+  const isEmail = await client.users.findMany({
+    where: {
+        email
+    }
+  })
+
+  if(isEmail.length > 0){
+    
+      throw { 
+          code: 'Conflict'
+      }
+
+  }
+}
+
+export async function findPassword(email:string) {
+  const senha = await client.users.findMany({
+    where: {
+        email
+    }
+  })
+
+  if(!senha){
+    throw {
+      code: 'NotFound'
+    }
+  }
+
+  return senha[0].senha;
+
+}
 // export default async function findById(id: number) {
 //   const result = await connection.query<Card, [number]>(
 //     "SELECT * FROM cards WHERE id=$1",

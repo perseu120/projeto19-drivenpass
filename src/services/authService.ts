@@ -1,27 +1,65 @@
-// import { TransactionTypes, Card, CardInsertData, insert, update } from './../repositories/cardRepository';
-// import { findByTypeAndEmployeeId } from "../repositories/cardRepository";
-// import { findByApiKey } from "../repositories/companyRepository";
-// import { findById } from "../repositories/employeeRepository";
-// import  findByIdCard  from './../repositories/cardRepository';
-// import { faker } from '@faker-js/faker';
-// import dayjs from 'dayjs';
-// import Cryptr from "cryptr";
-// import bcrypt from "bcrypt";
-// import { insertRecharge } from '../repositories/rechargeRepository';
+import dotenv from "dotenv";
+import Cryptr from "cryptr";
+import bcrypt from "bcrypt";
+import jwt from 'jsonwebtoken';
+import { findEmail, findPassword, insertUser, UserInsertData } from "../repositories/authRepository";
+dotenv.config();
 
-// const cryptr = new Cryptr('myTotallySecretKey');
+const cryptr = new Cryptr(process.env.CHAVE);
 
 
-// export async function verifyApiKey(apiKey: string ){
+export async function creatUser(user:UserInsertData) {
+    const email:string = String(user.email);
+    const senha:string = String(user.senha);
 
+    console.log(email);
 
-//     const companyApiKey = await findByApiKey(apiKey);
+    await findEmail(email);
+    
+    const encryptedPassword:string = await encryptPassword(senha);
 
-//     if(!companyApiKey){
-//         throw { code:"NotFound" }
-//     }
+    const userInsertData:UserInsertData = {email, senha:encryptedPassword}
 
-// }
+    await insertUser(userInsertData);
+
+}
+
+function encryptPassword(password: string) {
+    const encryptedPassword = bcrypt.hashSync(password, Number(process.env.KEY));
+    return encryptedPassword;
+}
+
+export async function login(email:string, senha:string){
+
+    const encryptedPassword = await findPassword(email);
+
+    authenticatePassword(senha, encryptedPassword);
+
+    const SECRET: string = process.env.TOKEN_SECRET_KEY ;
+    const EXPIRES_IN = process.env.TOKEN_EXPIRES_IN;
+
+    const payload = {
+        email,
+        senha: encryptedPassword
+    };
+  
+    const jwtConfig = {
+        expiresIn: EXPIRES_IN
+    };
+  
+    const token = jwt.sign(payload, SECRET, jwtConfig);
+
+    return token;
+
+}
+
+function authenticatePassword(password: string, encryptedPassword: string) {
+    const comparePassword = bcrypt.compareSync(password, encryptedPassword);
+    if(!comparePassword){
+      throw { code: 'Unauthorized' }
+    }
+}
+
 
 // export async function verifyEmployee(employeeId: number){
 
@@ -96,16 +134,6 @@
 
 // }
 
-// export async function verifyCardExistent(id){
-//     const card = findByIdCard(id)
-    
-//     if(!card){
-//         throw {code: "NotFound"}
-//     }
-
-//     return card;
-// }
-
 // export async function verifyValidateDateCard(expirationDate){
 //     const dateDifference = dayjs(expirationDate).diff(dayjs().format('MM/YY'),'month', true);
 
@@ -128,13 +156,6 @@
 //       throw { 
 //         code: 'Conflict'
 //       }
-//     }
-// }
-
-// function authenticatePassword(password: string, encryptedPassword: string) {
-//     const comparePassword = bcrypt.compareSync(password, encryptedPassword);
-//     if(!comparePassword){
-//       throw { code: 'Unauthorized' }
 //     }
 // }
 
@@ -164,10 +185,7 @@
 //     await update(id, {isBlocked: true});
 // }
 
-// function encryptPassword(password: string) {
-//     const encryptedPassword = bcrypt.hashSync(password, 10);
-//     return encryptedPassword;
-// }
+
 
 // function verifyCVC(cvc: string, encryptedCVC: string) {
     

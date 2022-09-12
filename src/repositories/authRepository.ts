@@ -1,13 +1,4 @@
 import client from "../database";
-// import { mapObjectToUpdateQuery } from "../utils/sqlUtils";
-
-// export type TransactionTypes =
-//   | "groceries"
-//   | "restaurant"
-//   | "transport"
-//   | "education"
-//   | "health";
-
 
 export interface User {
   id: number;

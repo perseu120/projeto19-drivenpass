@@ -1,5 +1,5 @@
 import { Response, Request } from "express";
-import { createCredentialService } from "../services/credentialService";
+import { createCredentialService, getAllCredentialService, getOneCredentialService } from "../services/credentialService";
 
 
 export async function createCredentialController(req: Request, res: Response){
@@ -18,5 +18,16 @@ export async function createCredentialController(req: Request, res: Response){
 export async function getCredentialIdController(req: Request, res: Response){
     const userId: number = req.params.id
 
+    const allCredentialresult = getAllCredentialService(userId);
 
+    res.status(201).send(allCredentialresult);
+}
+
+export async function getCredentialsController(req: Request, res: Response) {
+
+    const userId: number = req.params.id
+    const credentialId: number = req.body.id
+
+    getOneCredentialService(credentialId, userId);
+    
 }

@@ -17,10 +17,12 @@ model users {
 
 model credentials{
   id Int @id @default(autoincrement())
-  titulo String
+  title String 
   url String
   userName String
-  senha String
+  password String
   users    users @relation(fields: [userId], references: [id])
   userId Int
+
+  @@unique([userId, title])
 }

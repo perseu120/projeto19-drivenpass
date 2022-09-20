@@ -1,7 +1,7 @@
 # <p align = "center"> Projeto DrivenPass </p>
 
 <p align="center">
-   <img src="https://notion-emojis.s3-us-west-2.amazonaws.com/prod/svg-twitter/1f512.svg"/>
+   <img width="200" src="https://notion-emojis.s3-us-west-2.amazonaws.com/prod/svg-twitter/1f512.svg"/>
 </p>
 
 <p align = "center">
